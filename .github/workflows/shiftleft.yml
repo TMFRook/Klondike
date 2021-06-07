@@ -1,5 +1,4 @@
-# This workflow integrates ShiftLeft NG SAST with GitHub
-# Visit https://docs.shiftleft.io for help
+# Shiftleft engine v2
 name: Analyze with ShiftLeft NG SAST
 
 on:
@@ -16,7 +15,10 @@ jobs:
     - name: Download ShiftLeft cli
       run: |
         curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl
+    - run: echo REPOSITORY_NAME=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}') >> $GITHUB_ENV
+      shell: bash
     - name: Javascript
-      run: ${GITHUB_WORKSPACE}/sl analyze --verbose --app Klondike --tag branch=${GITHUB_REF} --js --cpg $(pwd)
+      if: env.SHIFTLEFT_ACCESS_TOKEN != null
+      run: ${GITHUB_WORKSPACE}/sl analyze --tag app.group=$REPOSITORY_NAME --app ${REPOSITORY_NAME}-javascript --cpg --tag branch=${GITHUB_REF} --js $(pwd)
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
